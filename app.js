@@ -61,8 +61,7 @@ function auth(req, res, next)
     next();
   }
 }
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public/resumes')));
+app.use(express.static(path.join(__dirname, '')));
 
 app.use(auth);
 
