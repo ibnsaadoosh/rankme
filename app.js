@@ -61,10 +61,11 @@ function auth(req, res, next)
     next();
   }
 }
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public/resumes')));
 
 app.use(auth);
 
-app.use(express.static(path.join(__dirname, 'public')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
