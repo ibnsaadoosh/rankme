@@ -2,6 +2,8 @@ var express = require('express');
 const passport = require('passport');
 var User = require('../models/user');
 const cors = require('./cors');
+var authenticate = require('../authenticate');
+
 
 var userRouter = express.Router();
 userRouter.use(express.json());
@@ -31,9 +33,10 @@ userRouter.route('/signup')
 userRouter.route('/login')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .post(cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
+  var token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({success: true, status: 'You are successfull logged in'});
+  res.json({success: true, token: token, status: 'You are successfull logged in'});
 });
 
 userRouter.route('/logout')

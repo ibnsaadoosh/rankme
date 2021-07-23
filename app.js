@@ -33,38 +33,22 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(session({
-  name: 'session-id',
-  secret: 'secret-ya-habiby',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
+// app.use(session({
+//   name: 'session-id',
+//   secret: 'secret-ya-habiby',
+//   saveUninitialized: false,
+//   resave: false,
+//   store: new FileStore()
+// }));
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 //these roots will be accessible without requiring authentication
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/jobs', jobsRouter);
 
-function auth(req, res, next)
-{
-
-  if(!req.user)
-  {
-    var err = new Error('You are not authenticated!');
-    err.status = 403;
-    return next(err);
-  }
-  else
-  {
-    next();
-  }
-}
 app.use(express.static(path.join(__dirname, '')));
-
-app.use(auth);
 
 
 // catch 404 and forward to error handler
