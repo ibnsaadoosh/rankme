@@ -7,7 +7,6 @@ const dirPath = 'public/resumes';
 
 const cors = require('./cors');
 
-
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, dirPath)
@@ -57,11 +56,11 @@ fileUpload.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs');
 })
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, (req, res, next) => {
     fsExtra.emptyDir(dirPath)
     .then()
     .catch(err => next(err));
@@ -76,7 +75,8 @@ fileUpload.route('/')
 });
 
 fileUpload.route('/:jobID')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Jobs.findById(req.params.jobID)
     .then((job) => {
         res.statusCode = 200;
@@ -86,12 +86,12 @@ fileUpload.route('/:jobID')
     .catch((err) => next(err));
 })
 
-.post((req, res, next) => {
+.post(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('Post operation not supported no /jobs/'+ req.params.jobID);
 })
 
-.put((req, res, next) => {
+.put(cors.corsWithOptions, (req, res, next) => {
     Jobs.findByIdAndUpdate(req.params.jobID,
                            {$set: req.body},
                            {new: true})
@@ -105,7 +105,7 @@ fileUpload.route('/:jobID')
     .catch((err) => next(err));
 })
 
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, (req, res, next) => {
     Jobs.findByIdAndRemove(req.params.jobID)
     .then((job) => {
         job.resumes.map((resume) => {
@@ -119,18 +119,18 @@ fileUpload.route('/:jobID')
 });
 
 fileUpload.route('/:jobID/resumes')
-
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs' + req.params.jobID + '/resumes');
 })
 
-.put((req, res, next) => {
+.put(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs' + req.params.jobID + '/resumes');
 })
 
-.post(upload.array('filefield', 10000), (req, res, next) => {
+.post(cors.corsWithOptions, upload.array('filefield', 10000), (req, res, next) => {
     //nlp_model
     Jobs.findById(req.params.jobID)
     .then((job) => {
@@ -149,13 +149,14 @@ fileUpload.route('/:jobID/resumes')
     .catch((err) => next(err));
 })
 
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs' + req.params.jobID + '/resumes');
 })
 
 fileUpload.route('/:jobID/resumes/:resumeID')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Jobs.findById(req.params.jobID)
     .then((job) => {
         resume = job.resumes.find(cv => cv._id == req.params.resumeID);
@@ -175,17 +176,17 @@ fileUpload.route('/:jobID/resumes/:resumeID')
     .catch((err) => next(err));
 })
 
-.post((req, res, next) => {
+.post(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('Post operation not supported no /jobs/'+ req.params.jobID + '/resumes/' + req.params.resumeID);
 })
 
-.put((req, res, next) => {
+.put(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end('Put operation not supported no /jobs/'+ req.params.jobID + '/resumes/' + req.params.resumeID);
 })
 
-.delete((req, res, next) => {
+.delete(cors.corsWithOptions, (req, res, next) => {
     Jobs.findById(req.params.jobID)
     .then((job) => {
         resume = job.resumes.find(cv => cv._id == req.params.resumeID);
