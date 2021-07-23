@@ -5,12 +5,15 @@ const Jobs = require('../models/job');
 const fsExtra = require('fs-extra');
 const dirPath = 'public/resumes';
 
+const cors = require('./cors');
+
+
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, dirPath)
     },
     filename: (req, file, callback) => {
-        callback(null, new Date().toUTCString() + '$' + file.originalname)
+        callback(null, Date.now() + '$' + file.originalname)
     }
 });
 
@@ -28,7 +31,8 @@ const fileUpload = express.Router();
 
 // req.body.resumes = req.files;
 fileUpload.route('/')
-.get((req, res, next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors, (req, res, next) => {
     Jobs.find({})
     .then((jobs) => {
         res.statusCode = 200;
@@ -37,7 +41,7 @@ fileUpload.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(upload.array('filefield', 10000), (req, res, next) => {
+.post(cors.corsWithOptions, upload.array('filefield', 10000), (req, res, next) => {
     Jobs.create(req.body)
     .then((job) => {
         req.files.map((file) => {
