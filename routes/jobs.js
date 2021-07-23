@@ -135,7 +135,7 @@ fileUpload.route('/:jobID/resumes')
     Jobs.findById(req.params.jobID)
     .then((job) => {
         req.files.map((file) => {
-            job.resumes = job.resumes.concat({filename: file.filesname, path: file.path, percentage: Math.random(), jobId: job._id});
+            job.resumes = job.resumes.concat({filename: file.filename, path: file.path, percentage: Math.random(), jobId: job._id});
         });
 
         job.save()
