@@ -7,6 +7,7 @@ var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var passport = require('passport');
 const mongoose = require('mongoose');
+var cors = require('cors')
 
 
 var indexRouter = require('./routes/index');
@@ -16,7 +17,6 @@ const { RequestHeaderFieldsTooLarge } = require('http-errors');
 
 const url = 'mongodb://localhost:27017/rankme';
 const connect = mongoose.connect(url);
-
 connect.then((db) => {
   console.log("Connected correctly to server");
 }, (err) => {
@@ -24,6 +24,7 @@ connect.then((db) => {
 });
 
 var app = express();
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

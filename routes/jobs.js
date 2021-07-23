@@ -60,7 +60,7 @@ fileUpload.route('/')
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs');
 })
-.delete(cors.corsWithOptions, (req, res, next) => {
+.delete(cors.cors, (req, res, next) => {
     fsExtra.emptyDir(dirPath)
     .then()
     .catch(err => next(err));
@@ -95,7 +95,7 @@ fileUpload.route('/:jobID')
     Jobs.findByIdAndUpdate(req.params.jobID,
                            {$set: req.body},
                            {new: true})
-    
+
     .then((job) => {
         //nlp model(req.body.description, job.resumes)
         res.statusCode = 200,
@@ -137,7 +137,7 @@ fileUpload.route('/:jobID/resumes')
         req.files.map((file) => {
             job.resumes = job.resumes.concat({filename: file.filesname, path: file.path, percentage: Math.random(), jobId: job._id});
         });
-        
+
         job.save()
         .then((job) => {
             res.statusCode = 200;
@@ -198,7 +198,7 @@ fileUpload.route('/:jobID/resumes/:resumeID')
             res.setHeader('Content-Type', 'application/json');
             res.json(job);
         }, (err) => next(err))
-        .catch((err) => next(err));        
+        .catch((err) => next(err));
     })
     .catch((err) => next(err))
 });
