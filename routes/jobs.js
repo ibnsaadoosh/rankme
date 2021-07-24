@@ -6,6 +6,21 @@ const fsExtra = require('fs-extra');
 const dirPath = 'public/resumes';
 var authenticate = require('../authenticate');
 const Users = require('../models/user');
+const ps = require('python-shell');
+
+function rank_resumes(description, resumes)
+{
+    const options = {
+        args: [description, resumes],
+        pythonOptions: ['-u'], // get print results in real-time
+    }
+    
+    ps.PythonShell.run('/home/saad/Documents/work/faculty/fourth-year/graduation-project/our-work/project/second-term/rankme-server/nlp-model/rank.py', options, function (err, result) {
+        if (err) throw err;
+        console.log(result)
+    });
+} 
+
 
 const cors = require('./cors');
 
@@ -36,6 +51,7 @@ fileUpload.route('/')
 .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
     Jobs.find({userID: req.user._id})
     .then((jobs) => {
+        rank_resumes(jobs[0].description, jobs[0].resumes);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(jobs);

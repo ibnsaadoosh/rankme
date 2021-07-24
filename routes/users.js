@@ -12,8 +12,7 @@ userRouter.route('/signup')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .post(cors.corsWithOptions, (req, res, next) => {
   User.register(new User({username: req.body.username}), req.body.password, (err, user) => {
-
-    if(err) 
+    if(err)
     {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
