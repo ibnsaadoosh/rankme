@@ -13,3 +13,5 @@ textract)
 
 20
 
+
+try catch for textract

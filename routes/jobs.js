@@ -8,7 +8,7 @@ var authenticate = require('../authenticate');
 const Users = require('../models/user');
 const ps = require('python-shell');
 
-function rank_resumes(description, resumes)
+function rank_resumes(description, resumes, callback)
 {
     const options = {
         args: [description, resumes],
@@ -17,9 +17,9 @@ function rank_resumes(description, resumes)
     
     ps.PythonShell.run('/home/saad/Documents/work/faculty/fourth-year/graduation-project/our-work/project/second-term/rankme-server/nlp-model/rank.py', options, function (err, result) {
         if (err) throw err;
-        console.log(result)
+        callback(result);
     });
-} 
+}
 
 
 const cors = require('./cors');
@@ -51,7 +51,6 @@ fileUpload.route('/')
 .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
     Jobs.find({userID: req.user._id})
     .then((jobs) => {
-        rank_resumes(jobs[0].description, jobs[0].resumes);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(jobs);
@@ -65,16 +64,27 @@ fileUpload.route('/')
         req.files.map((file) => {
             job.resumes = job.resumes.concat({filename: file.filename, path: file.path, percentage: Math.random(), jobId: job._id});
         });
-        job.save()
-        .then((job) => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json({sucess: "true", job: job});
-        }, (err) => next(err))
-        .catch((err) => next(err));
+        resumes_names = job.resumes.map((resume) => {
+            return resume.filename;
+        })
+        rank_resumes(job.description, resumes_names, (result) => {
+            result = JSON.parse(result[0]);
+            job.resumes.map((resume) => {
+                resume.percentage = result.filter((res) => {
+                    return res.filename == resume.filename
+                })[0].score;
+            });
+            job.save()
+            .then((job) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json({sucess: "true", job: job});
+            }, (err) => next(err))
+            .catch((err) => next(err));
+        }); 
+        
     }, (err) => next(err))
     .catch((err) => next(err));
-
 })
 .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
