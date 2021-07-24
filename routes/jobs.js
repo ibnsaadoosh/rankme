@@ -57,6 +57,7 @@ fileUpload.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+
 .post(cors.corsWithOptions, authenticate.verifyUser, upload.array('filefield', 10000), (req, res, next) => {
     req.body.userID = req.user._id;
     Jobs.create(req.body)
@@ -64,9 +65,7 @@ fileUpload.route('/')
         req.files.map((file) => {
             job.resumes = job.resumes.concat({filename: file.filename, path: file.path, percentage: Math.random(), jobId: job._id});
         });
-        resumes_names = job.resumes.map((resume) => {
-            return resume.filename;
-        })
+        let resumes_names = job.resumes.map(resume => resume.filename);
         rank_resumes(job.description, resumes_names, (result) => {
             result = JSON.parse(result[0]);
             job.resumes.map((resume) => {
@@ -74,6 +73,7 @@ fileUpload.route('/')
                     return res.filename == resume.filename
                 })[0].score;
             });
+            job.resumes.sort((a, b) => (a.percentage < b.percentage) ? 1 : -1)
             job.save()
             .then((job) => {
                 res.statusCode = 200;
@@ -86,6 +86,7 @@ fileUpload.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
+
 .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /jobs');
@@ -145,17 +146,28 @@ fileUpload.route('/:jobID')
         //autherized
         else
         {
-            Jobs.findByIdAndUpdate(req.params.jobID,
-                {$set: req.body},
-                {new: true})
+            let resumes_names = job.resumes.map(resume => resume.filename);
+            rank_resumes(job.description, resumes_names, (result) => {
+                result = JSON.parse(result[0]);
+                job.resumes.map((resume) => {
+                    resume.percentage = result.filter((res) => {
+                        return res.filename == resume.filename
+                    })[0].score;
+                });
+                req.body.resumes = job.resumes;
+                Jobs.findByIdAndUpdate(req.params.jobID,
+                    {$set: req.body},
+                    {new: true})
 
-            .then((job) => {
-            //nlp model(req.body.description, job.resumes)
-            res.statusCode = 200,
-            res.setHeader('Content-Type', 'application/json'),
-            res.json(job);
-            }, (err) => next(err))
-            .catch((err) => next(err));
+                .then((job) => {
+    
+                //nlp model(req.body.description, job.resumes)
+                res.statusCode = 200,
+                res.setHeader('Content-Type', 'application/json'),
+                res.json(job);
+                }, (err) => next(err))
+                .catch((err) => next(err));
+            });
         }
     }, (err) => next(err))
     .catch((err) => next(err));
@@ -217,14 +229,24 @@ fileUpload.route('/:jobID/resumes')
             req.files.map((file) => {
                 job.resumes = job.resumes.concat({filename: file.filename, path: file.path, percentage: Math.random(), jobId: job._id});
             });
-            job.save()
-            .then((job) => {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json(job);
-            }, (err) => next(err))
-            .catch((err) => next(err));
-        }
+            let resumes_names = job.resumes.map(resume => resume.filename);
+            rank_resumes(job.description, resumes_names, (result) => {
+                result = JSON.parse(result[0]);
+                job.resumes.map((resume) => {
+                    resume.percentage = result.filter((res) => {
+                        return res.filename == resume.filename
+                    })[0].score;
+                });
+                job.resumes.sort((a, b) => (a.percentage < b.percentage) ? 1 : -1)
+                job.save()
+                .then((job) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(job);
+                }, (err) => next(err))
+                .catch((err) => next(err));
+            });
+        }     
     }, (err) => next(err))
     .catch((err) => next(err));
 })
