@@ -20,7 +20,7 @@ def read_All_CV(filename):
     return text.decode('utf-8')
 
 for cv in resumes:
-    temp = '/home/saad/Documents/work/faculty/fourth-year/graduation-project/our-work/project/second-term/rankme-server/public/resumes/';
+    temp = '/home/saad/Documents/work/faculty/fourth-year/graduation-project/our-work/project/second-term/rankme-server/public/resumes/'
     text = read_All_CV(temp + cv)
     target_docs.append(text)
 
