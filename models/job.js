@@ -39,7 +39,12 @@ var jobSchema = new mongoose.Schema({
         required: true,
         default: "job description"
     },
-    resumes: [resumeSchema]
+    resumes: [resumeSchema],
+    userID: 
+    {
+        type: String,
+        required: true
+    }
 });
 
 var Jobs = mongoose.model('Job', jobSchema);
